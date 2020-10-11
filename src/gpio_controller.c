@@ -1,5 +1,9 @@
 #include "gpio_controller.h"
 
+int ventoinhaOn = 0;
+int resistorOn = 0;
+
+
 int getNextAction(temperature* temperatures){
   float desiredTemperature = temperatures->manualControl != 0 ? temperatures->manualControl : temperatures->analogicControl;
 
@@ -28,14 +32,25 @@ void handleHardware(int action, int pin){
 void gpio_temperatureControl(void* args)
 {
   temperature *temperatures = (temperature*) args;
-
-  if (!bcm2835_init())
-    return;
-
-  handleHardware(getNextAction(temperatures), WIND);
-  handleHardware(getNextAction(temperatures), FIRE);
-
-  bcm2835_close();
+  int nextAction = getNextAction(temperatures), shouldRun = 1;
+  if(nextAction == BALANCE && ventoinhaOn == 0 && resistorOn == 0){
+    shouldRun = 0;
+  }
+  else if(nextAction == WIND && ventoinhaOn == 1 && resistorOn == 0){
+    shouldRun = 0;
+  }
+  else if(nextAction == FIRE && ventoinhaOn == 0 && resistorOn == 1){
+    shouldRun = 0;
+  }
+  ventoinhaOn = nextAction == WIND ? 1 : 0;
+  resistorOn = nextAction == FIRE ? 1 : 0;
+  if (shouldRun){
+    if (bcm2835_init()){
+      handleHardware(nextAction, WIND);
+      handleHardware(nextAction, FIRE);
+      bcm2835_close();
+    }
+  }
 }
 
 void shutdown(){

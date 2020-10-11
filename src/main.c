@@ -1,7 +1,7 @@
 #include "includes.h"
 
 /* Variáveis */
-temperature temperatures;
+volatile temperature temperatures;
 pthread_t userInterruptThread;
 int printInfoCounter = 0, logCounter = 0, lcdCounter = 0, gpioCounter = 0;
 
@@ -79,7 +79,7 @@ void alarmHandler(){
     pthread_create (&saveInFileThread, NULL, &saveInFile, (void*)&temperatures);
     
   }
-  
+
   gpioCounter++;
   logCounter++;
   printInfoCounter++;

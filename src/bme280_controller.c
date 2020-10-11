@@ -1,7 +1,7 @@
 #include "bme280_controller.h"
 
 
-double BME280_updateTemperature(temperature* temperature){
+double BME280_updateTemperature(volatile temperature* temperature){
   struct bme280_dev dispositivo;
   struct identificador user_id;
 
@@ -45,7 +45,7 @@ double BME280_updateTemperature(temperature* temperature){
   return 0;
 }
 
-int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, temperature* temperature)
+int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, volatile temperature* temperature)
 {
 	int8_t rslt;
 	uint8_t settings_sel;
@@ -73,7 +73,7 @@ int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev, temperature* tempe
 	return rslt;
 }
 
-void handle_sensor_data(struct bme280_data *comp_data, temperature* temperature)
+void handle_sensor_data(struct bme280_data *comp_data,volatile temperature* temperature)
 {
     temperature->out = comp_data->temperature;
 }
