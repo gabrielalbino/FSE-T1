@@ -6,4 +6,4 @@
 #define CSV_PATH "log.csv"
 
 void initCSV();
-void *saveInFile(void *args);
+void saveInFile(void *args);

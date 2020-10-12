@@ -8,6 +8,5 @@
 #define FLOAT 2
 #define STRING 3
 
-float ARD_comunicate(unsigned char *mensagem, int size, int returnType);
-float ARD_getAnalogicTemperatureData();
-float ARD_getInnerTemperatureData();
+float* ARD_comunicate(unsigned char **mensagem, int size, int returnType);
+float* ARD_getData();

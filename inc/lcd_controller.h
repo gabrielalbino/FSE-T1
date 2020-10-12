@@ -3,6 +3,6 @@
 
 #include "lcd_driver.h"
 
-void *lcd_print(void *args);
+void lcd_print(void *args);
 
 #endif

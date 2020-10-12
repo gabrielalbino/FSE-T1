@@ -1,6 +1,6 @@
 #include "lcd_controller.h"
 
-void* lcd_print(void* args)   {
+void lcd_print(void* args)   {
   temperature *temperatures = args;
   if (wiringPiSetup() == -1)
     exit(1);
@@ -21,6 +21,4 @@ void* lcd_print(void* args)   {
   typeln(line1);
   lcdLoc(LINE2);
   typeln(line2);
-
-  return NULL;
 }

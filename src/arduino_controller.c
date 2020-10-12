@@ -2,13 +2,15 @@
 #include <unistd.h>  //Used for UART
 #include <fcntl.h>   //Used for UART
 #include <termios.h> //Used for UART
+#include <stdlib.h>
 #include <string.h>  //Used for UART
 #include "arduino_controller.h"
 
 
-float ARD_comunicate(unsigned char *mensagem, int size, int returnType)
+float* ARD_comunicate(unsigned char **mensagem, int size, int returnType)
 {
     int uart0_filestream = -1;
+    float* result = (float*)malloc(2*sizeof(float));
 
     uart0_filestream = open("/dev/serial0", O_RDWR | O_NOCTTY | O_NDELAY); //Open in non blocking read/write mode
     if (uart0_filestream == -1)
@@ -25,75 +27,61 @@ float ARD_comunicate(unsigned char *mensagem, int size, int returnType)
         options.c_lflag = 0;
         tcflush(uart0_filestream, TCIFLUSH);
         tcsetattr(uart0_filestream, TCSANOW, &options);
+        for(int i = 0; i < 2; i++){
+            if (uart0_filestream != -1)
+            {
+                int count = write(uart0_filestream, &mensagem[i][0], size);
+                if (count < 0)
+                {
+                    printf("UART TX error\n");
+                }
+            }
+            usleep(500000);
 
-        if (uart0_filestream != -1)
-        {
-            int count = write(uart0_filestream, &mensagem[0], size);
-            if (count < 0)
+            //----- CHECK FOR ANY RX BYTES -----
+            if (uart0_filestream != -1)
             {
-                printf("UART TX error\n");
-            }
-        }
-        usleep(500000);
-
-        //----- CHECK FOR ANY RX BYTES -----
-        if (uart0_filestream != -1)
-        {
-            // Read up to 255 characters from the port if they are there
-            unsigned char rx_buffer[256];
-            int rx_length = read(uart0_filestream, (void *)rx_buffer, 255); //Filestream, buffer to store in, number of bytes to read (max)
-            if (rx_length < 0)
-            {
-                printf("Erro na leitura.\n"); //An error occured (will occur if there are no bytes)
-            }
-            else if (rx_length == 0)
-            {
-                printf("Nenhum dado disponível.\n"); //No data waiting
-            }
-            else
-            {
-                //Bytes received
-                close(uart0_filestream);
-                return *(float *)rx_buffer;
+                // Read up to 255 characters from the port if they are there
+                unsigned char rx_buffer[256];
+                int rx_length = read(uart0_filestream, (void *)rx_buffer, 255); //Filestream, buffer to store in, number of bytes to read (max)
+                if (rx_length < 0)
+                {
+                    printf("Erro na leitura.\n"); //An error occured (will occur if there are no bytes)
+                }
+                else if (rx_length == 0)
+                {
+                    printf("Nenhum dado disponível.\n"); //No data waiting
+                }
+                else
+                {
+                    //Bytes received
+                    result[i] = *(float *)rx_buffer;
+                }
             }
         }
         close(uart0_filestream);
+        free(mensagem[0]);
+        free(mensagem[1]);
+        free(mensagem);
     }
-    return 0;
+    return result;
 }
 
-float ARD_getAnalogicTemperatureData()
+float* ARD_getData()
 {
-    int code = 0xa2;
+    int codes[] = {0xa1, 0xa2};
     int size = 5;
     int returnType = FLOAT;
-    unsigned char tx_buffer[20];
-    unsigned char *p_tx_buffer;
+    unsigned char** tx_buffer;
+    tx_buffer = malloc(2 * sizeof(char *));
 
-    p_tx_buffer = &tx_buffer[0];
-    *p_tx_buffer++ = code;
-    *p_tx_buffer++ = 8;
-    *p_tx_buffer++ = 3;
-    *p_tx_buffer++ = 6;
-    *p_tx_buffer++ = 1;
-
-    return ARD_comunicate(tx_buffer, size, returnType);
-}
-
-float ARD_getInnerTemperatureData()
-{
-    int code = 0xa1;
-    int size = 5;
-    int returnType = FLOAT;
-    unsigned char tx_buffer[20];
-    unsigned char *p_tx_buffer;
-
-    p_tx_buffer = &tx_buffer[0];
-    *p_tx_buffer++ = code;
-    *p_tx_buffer++ = 8;
-    *p_tx_buffer++ = 3;
-    *p_tx_buffer++ = 6;
-    *p_tx_buffer++ = 1;
-
+    for(int i = 0; i < 2; i++){
+        tx_buffer[i] = malloc(5);
+        tx_buffer[i][0] = codes[i];
+        tx_buffer[i][1] = 8;
+        tx_buffer[i][2] = 3;
+        tx_buffer[i][3] = 6;
+        tx_buffer[i][4] = 1;
+    }
     return ARD_comunicate(tx_buffer, size, returnType);
 }

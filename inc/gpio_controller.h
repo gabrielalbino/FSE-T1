@@ -16,5 +16,4 @@ int on;
 int getNextAction(temperature *temperatures);
 void handleHardware(int action, int pin);
 void gpio_temperatureControl(void *args);
-void shutdown();
 #endif

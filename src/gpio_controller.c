@@ -44,20 +44,9 @@ void gpio_temperatureControl(void* args)
   }
   ventoinhaOn = nextAction == WIND ? 1 : 0;
   resistorOn = nextAction == FIRE ? 1 : 0;
+
   if (shouldRun){
-    if (bcm2835_init()){
       handleHardware(nextAction, WIND);
       handleHardware(nextAction, FIRE);
-      bcm2835_close();
-    }
   }
-}
-
-void shutdown(){
-  if (bcm2835_init()){
-    handleHardware(BALANCE, WIND);
-    handleHardware(BALANCE, FIRE);
-    bcm2835_close();
-  }
-  exit(0);
 }

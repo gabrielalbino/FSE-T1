@@ -7,7 +7,7 @@ void initCSV(){
     fclose(csv);
 }
 
-void *saveInFile(void* args){
+void saveInFile(void* args){
     temperature* temperatures = args;
     time_t timer;
     char dateTime[26];
@@ -19,10 +19,8 @@ void *saveInFile(void* args){
     strftime(dateTime, 26, "%Y-%m-%d %H:%M:%S", tm_info);
 
     char linha[200];
-    sprintf(linha, "%s,%.2f,%.2f,%.2f\n", dateTime, temperatures->in, temperatures->out, temperatures->manualControl);
+    sprintf(linha, "%s,%.2f,%.2f,%.2f\n", dateTime, temperatures->in, temperatures->out, temperatures->manualControl != 0 ? temperatures->manualControl : temperatures->analogicControl);
     FILE* csv = fopen(CSV_PATH, "a+");
     fwrite(linha, 1, strlen(linha), csv);
     fclose(csv);
-    return NULL;
-
 }
