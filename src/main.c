@@ -138,7 +138,7 @@ void* printTemperatureData(void* unused){
     if(shouldPrintData){
       time(&segundos);   
       data_hora_atual = localtime(&segundos);
-//      system("clear");
+      system("clear");
       printf("%d:", data_hora_atual->tm_hour); //hora
       printf("%d:",data_hora_atual->tm_min);//minuto
       printf("%d\n\n",data_hora_atual->tm_sec);//segundo  
