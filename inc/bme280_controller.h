@@ -13,8 +13,8 @@
 #include <time.h>
 #include <errno.h>
 #include "types.h"
-
-double BME280_updateTemperature(volatile temperature* temperature);
+int BME280_setup();
+double BME280_updateTemperature(volatile temperature *temperature);
 void user_delay_us(uint32_t period, void *intf_ptr);
 int8_t user_i2c_read(uint8_t reg_addr, uint8_t *data, uint32_t len, void *intf_ptr);
 int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *data, uint32_t len, void *intf_ptr);

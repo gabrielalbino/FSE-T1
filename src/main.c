@@ -101,14 +101,20 @@ void alarmHandler(){
 }
 
 void* outerTemperatureMonitor(void* unused){
-  while(1){
-    if(outerTemperatureMonitorLocker){
-      BME280_updateTemperature(&temperatures);
-      outerTemperatureMonitorLocker = 0;
+  if(BME280_setup() == 0){
+    while (1)
+    {
+      if(outerTemperatureMonitorLocker){
+        BME280_updateTemperature(&temperatures);
+        outerTemperatureMonitorLocker = 0;
+      }
+      usleep(1000);
     }
-    usleep(1000);
+    return NULL;
+  }else{
+    printf("Erro da bme280: %d\n", BME280_setup());
+    exit(-1);
   }
-  return NULL;
 }
 
 void* innerAnalogTemperatureMonitor(void* unused){
@@ -132,7 +138,7 @@ void* printTemperatureData(void* unused){
     if(shouldPrintData){
       time(&segundos);   
       data_hora_atual = localtime(&segundos);
-      system("clear");
+//      system("clear");
       printf("%d:", data_hora_atual->tm_hour); //hora
       printf("%d:",data_hora_atual->tm_min);//minuto
       printf("%d\n\n",data_hora_atual->tm_sec);//segundo  

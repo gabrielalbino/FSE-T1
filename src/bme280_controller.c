@@ -1,41 +1,43 @@
 #include "bme280_controller.h"
+struct bme280_dev dispositivo;
+struct identificador user_id;
 
+int BME280_setup(){
+    int8_t rslt = BME280_OK;
+    /* Variable to define the result */
+
+    if ((user_id.descritorDoArquivo = open("/dev/i2c-1", O_RDWR)) < 0)
+    {
+        return rslt;
+    }
+    user_id.enderecoDoDispositivo = BME280_I2C_ADDR_PRIM;
+
+    if (ioctl(user_id.descritorDoArquivo, I2C_SLAVE, user_id.enderecoDoDispositivo) < 0) {
+        printf("Failed to acquire bus access and/or talk to slave.\n");
+        exit(1);
+    }
+
+
+    dispositivo.intf = BME280_I2C_INTF;
+    dispositivo.read = user_i2c_read;
+    dispositivo.write = user_i2c_write;
+    dispositivo.delay_us = user_delay_us;
+
+    /* Update interface pointer with the structure that contains both device address and file descriptor */
+    dispositivo.intf_ptr = &user_id;
+
+    /* Initialize the bme280 */
+    rslt = bme280_init(&dispositivo);
+    if (rslt != BME280_OK)
+    {
+        fprintf(stderr, "Failed to initialize the device (code %+d).\n", rslt);
+        exit(1);
+    }
+    return rslt;
+}
 
 double BME280_updateTemperature(volatile temperature* temperature){
-  struct bme280_dev dispositivo;
-  struct identificador user_id;
-
-  /* Variable to define the result */
-  int8_t rslt = BME280_OK;
-
-  if ((user_id.descritorDoArquivo = open("/dev/i2c-1", O_RDWR)) < 0)
-  {
-      return -1.f;
-  }
-
-  if (ioctl(user_id.descritorDoArquivo, I2C_SLAVE, 0x76) < 0) {
-      printf("Failed to acquire bus access and/or talk to slave.\n");
-      exit(1);
-  }
-
-  user_id.enderecoDoDispositivo = BME280_I2C_ADDR_PRIM;
-
-  dispositivo.intf = BME280_I2C_INTF;
-  dispositivo.read = user_i2c_read;
-  dispositivo.write = user_i2c_write;
-  dispositivo.delay_us = user_delay_us;
-
-  /* Update interface pointer with the structure that contains both device address and file descriptor */
-  dispositivo.intf_ptr = &user_id;
-
-  /* Initialize the bme280 */
-  rslt = bme280_init(&dispositivo);
-  if (rslt != BME280_OK)
-  {
-      fprintf(stderr, "Failed to initialize the device (code %+d).\n", rslt);
-      exit(1);
-  }
-
+int8_t rslt = BME280_OK;
   rslt = stream_sensor_data_normal_mode(&dispositivo, temperature);
   if (rslt != BME280_OK)
   {
